@@ -1,0 +1,176 @@
+syntax = "proto3";
+package types;
+
+message Currency {
+    // identifier
+    int32 id = 1;
+    // BTC
+    string name = 2;
+    // Bitcoin
+    string desc = 3;
+    // Is currency belongs to blockchain (false for ICO and fiat, like YCC,CNY)
+    bool crypto = 4;
+    // Is allowed for deposit (false for ICO)
+    bool payinEnabled = 5;
+    // Is required to provide additional information other than the address for deposit
+    bool payinPaymentId = 6;
+    // Blocks confirmations count for deposit
+    int32 payinConfirmations = 7;
+    // Is allowed for withdraw (false for ICO)
+    bool payoutEnabled = 8;
+    // Is allowed to provide additional information for withdraw
+    bool payoutPaymentId = 9;		
+    // Is allowed to transfer between trading and account (may be disabled on maintain)
+    bool transferEnabled = 10;
+    // Is stopped deposit and trading
+    bool delisted = 11;
+    // Withdraw fee
+    float payoutFee = 12;
+}
+
+message Balance {
+    string currency = 1;
+    float active = 2;
+    float frozen = 3;
+}
+
+message Account {
+    string id = 1;
+    repeated Balance wallets = 2;
+}
+
+message Symbol {
+    // identifier, "ETHBTC"
+    string name = 1;
+    // ETH
+    string baseCurrency = 2;
+    // BTC
+    string quotoCurrency = 3;
+    // 0.000001
+    float pricePrecision = 4;
+    // 0.001
+    float amountPrecision = 5;
+    // BTC
+    string feeCurrency = 6;	
+    // 0.001
+    float feeRate = 7;
+    // eg: huobi.pro "main主区"，"innovation创新区"，"bifurcation分叉区"
+    string partion = 8;
+}
+
+message Ticker {
+    // Best buy price
+    float bid = 1;
+    // Best sell price
+    float ask = 2;
+    // Last trade price
+    float last = 3;
+    // Last trade price 24 hours ago
+    float open = 4;	
+    // owest trade price within 24 hours
+    float low = 5;
+    // Highest trade price within 24 hours
+    float high = 6;
+    // Total trading amount within 24 hours in base currency
+    float volumeBase = 7;
+    // Total trading amount within 24 hours in quote currency
+    float volumeQuote = 8;		
+    // Last update or refresh ticker time(ms)
+    int64 ts = 9;	
+    // trading symbol
+    string symbol = 10;	
+}
+
+message Trade {
+    string mtfId = 1;   
+    string symbol = 2;
+    string activeId = 3; 
+    string passiveId = 4;
+    float price = 5;  
+    float amount = 6; 
+    OrderType type = 7;
+    // Fee currency see in symbol config
+    float fee = 8;
+    // trade match time(ms) 
+    int64 ts = 9;
+ }
+
+message Depth {
+    float price = 1;
+    float amount = 2;
+}
+
+message Depths {
+    repeated Depth asks = 1;
+    repeated Depth bids = 2;
+}
+
+message Kline {
+    float open = 1;
+    float close	= 2;
+    float min = 3;
+    float max = 4;
+    float volumeBase = 5;
+    float volumeQuote = 6;
+    // time(ms)
+    int64 ts = 7;
+}
+
+enum OrderType {
+    LimitBuy = 0;
+    LimitSell = 1;
+    MarketBuy = 2;
+    MarketSell = 3;
+    IocBuy = 4;
+    IocSell = 5;
+    StopLimit = 6;
+    StopMarket = 7;
+}
+
+enum OrderStatus {
+    New = 0;
+    Submitted = 1;
+    PartialFilled = 2;
+    PartialCanceled = 3;
+    Filled = 4;
+    Canceled = 5;
+    Expired = 6;
+}
+
+// a special instruction used when placing a trade to indicate how long an order will remain active before it is executed or expires 
+enum ForceType {
+    // Good till cancel. GTC order won't close until it is filled. default
+    GTC = 0; 
+    // An immediate or cancel order is an order to buy or sell that must be executed immediately, and any portion of the order that cannot be immediately filled is cancelled.
+    IOC = 1;  
+    // Fill or kill is a type of time-in-force designation used in securities trading that instructs a brokerage to execute a transaction immediately and completely or not at all. 
+    FOK = 2;
+    // Keeps the order active until the end of the trading day in UTC. 
+    DAY = 3;
+    // Good till date specified in expireTime.
+    GTD = 4;
+}
+
+message Order {
+    string id = 1;
+    string symbol = 2;
+    float price = 3;
+    float placeQuantity = 4;
+    float doneQuantity = 5;
+    // based on quote currency
+    float cost = 6;
+    // depends on symbol's fee currency
+    float filledFee = 7;
+    // time(ms)
+    int64 createdAt = 8;
+    int64 canceledAt = 9;
+    int64 updatedAt = 10; 
+    OrderType type = 11;
+    OrderStatus status = 12;
+    // extra info
+    string accountId = 13;
+    ForceType timeInForce = 14;
+    string source = 15; // api, web, app
+    float stopPrice = 16;
+    float feeRate = 17;
+}
